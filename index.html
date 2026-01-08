@@ -26,10 +26,21 @@ button{width:100%;padding:12px;margin-top:14px;border-radius:14px;border:none;fo
 .list{margin-top:14px}
 .item{display:flex;justify-content:space-between;border-bottom:1px dashed #ddd;padding:6px 0;font-size:14px}
 .logo{text-align:center;font-size:26px;margin-bottom:10px}
+
+/* FOOTER */
+.footer{
+text-align:center;
+padding:14px;
+font-size:13px;
+color:#6b7280;
+}
+.footer b{color:var(--primary)}
+
 @media print{
 body *{visibility:hidden}
 #printPage,#printPage *{visibility:visible}
 #printPage{position:absolute;top:0;left:0;width:100%}
+.footer{display:none}
 }
 </style>
 </head>
@@ -39,7 +50,7 @@ body *{visibility:hidden}
 <!-- LOGIN -->
 <div class="page active" id="login">
 <div class="card">
-<div class="logo">🧾 TOKO KITA</div>
+<div class="logo">KASIR BY SANZZ</div>
 <h2>Login Kasir</h2>
 <label>Username</label><input id="user">
 <label>Password</label><input id="pass" type="password">
@@ -107,6 +118,10 @@ body *{visibility:hidden}
 <button class="gray" onclick="backKasir()">Kembali</button>
 </div>
 </div>
+
+<footer class="footer">
+© 2026 Kasir Web — Dibuat oleh <b>Sanzz</b>
+</footer>
 
 <script>
 let items=[];

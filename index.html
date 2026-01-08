@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kasir Web</title>
+
+<style>
+:root{
+--primary:#4f46e5;--bg:#f4f6fb;--card:#fff;--muted:#6b7280
+}
+*{box-sizing:border-box;font-family:Segoe UI,Arial}
+body{margin:0;background:var(--bg)}
+.page{display:none;padding:16px}
+.page.active{display:block}
+.card{max-width:420px;margin:auto;background:var(--card);border-radius:18px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+h2{text-align:center;margin:8px 0}
+p{text-align:center;color:var(--muted);margin:0}
+label{font-size:13px;color:var(--muted);margin-top:12px;display:block}
+input{width:100%;padding:12px;margin-top:6px;border-radius:12px;border:1px solid #e5e7eb}
+button{width:100%;padding:12px;margin-top:14px;border-radius:14px;border:none;font-weight:600}
+.primary{background:var(--primary);color:#fff}
+.gray{background:#e5e7eb}
+.danger{background:#ef4444;color:#fff}
+.warning{display:none;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;padding:12px;border-radius:14px;margin-top:12px}
+.list{margin-top:14px}
+.item{display:flex;justify-content:space-between;border-bottom:1px dashed #ddd;padding:6px 0;font-size:14px}
+.logo{text-align:center;font-size:26px;margin-bottom:10px}
+@media print{
+body *{visibility:hidden}
+#printPage,#printPage *{visibility:visible}
+#printPage{position:absolute;top:0;left:0;width:100%}
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div class="page active" id="login">
+<div class="card">
+<div class="logo">🧾 TOKO KITA</div>
+<h2>Login Kasir</h2>
+<label>Username</label><input id="user">
+<label>Password</label><input id="pass" type="password">
+<div id="loginWarn" class="warning">Username atau password salah</div>
+<button class="primary" onclick="loginUser()">Login</button>
+</div>
+</div>
+
+<!-- KASIR -->
+<div class="page" id="kasir">
+<div class="card">
+<h2>Kasir</h2>
+<p>Input barang</p>
+
+<label>Nama Barang</label><input id="barang">
+<label>Harga</label><input id="harga" type="number">
+<label>Jumlah</label><input id="jumlah" type="number">
+<button class="primary" onclick="tambah()">Tambah Barang</button>
+
+<div class="list" id="list"></div>
+
+<label>Bayar</label><input id="bayar" type="number">
+<div id="warn" class="warning">Data belum lengkap</div>
+
+<button class="primary" onclick="buatStruk()">Lihat Struk</button>
+<button class="gray" onclick="openHistory()">Riwayat</button>
+<button class="gray" onclick="openChangePw()">Ganti Password</button>
+<button class="danger" onclick="logout()">Logout</button>
+</div>
+</div>
+
+<!-- STRUK -->
+<div class="page" id="printPage">
+<div class="card">
+<h2>STRUK</h2>
+<div id="isiStruk"></div>
+<button class="primary" onclick="window.print()">Print</button>
+<button class="gray" onclick="backKasir()">Kembali</button>
+</div>
+</div>
+
+<!-- RIWAYAT -->
+<div class="page" id="history">
+<div class="card">
+<h2>Riwayat Transaksi</h2>
+<div id="listHistory"></div>
+<button class="gray" onclick="backKasir()">Kembali</button>
+</div>
+</div>
+
+<!-- GANTI PASSWORD -->
+<div class="page" id="changePw">
+<div class="card">
+<h2>Ganti Password</h2>
+
+<label>Password Lama</label>
+<input type="password" id="oldPw">
+
+<label>Password Baru</label>
+<input type="password" id="newPw">
+
+<div id="pwWarn" class="warning">Password lama salah / password baru terlalu pendek</div>
+
+<button class="primary" onclick="gantiPassword()">Simpan</button>
+<button class="gray" onclick="backKasir()">Kembali</button>
+</div>
+</div>
+
+<script>
+let items=[];
+let historyData=JSON.parse(localStorage.getItem("history")||"[]");
+let savedPw=localStorage.getItem("pw")||"2008";
+
+function loginUser(){
+if(user.value==="Sanzz" && pass.value===savedPw){
+login.classList.remove("active");
+kasir.classList.add("active");
+loginWarn.style.display="none";
+}else{
+loginWarn.style.display="block";
+}
+}
+
+function tambah(){
+if(!barang.value||harga.value<=0||jumlah.value<=0)return;
+items.push({b:barang.value,h:+harga.value,j:+jumlah.value});
+barang.value=harga.value=jumlah.value="";
+render();
+}
+
+function render(){
+let t=0,html="";
+items.forEach(i=>{
+let s=i.h*i.j;t+=s;
+html+=`<div class="item"><span>${i.b} (${i.j}x)</span><span>${s}</span></div>`;
+});
+html+=`<div class="item"><b>Total</b><b>${t}</b></div>`;
+list.innerHTML=html;
+}
+
+function buatStruk(){
+if(items.length===0||bayar.value<=0){
+warn.style.display="block";return;
+}
+warn.style.display="none";
+
+let t=0,h="";
+items.forEach(i=>{
+let s=i.h*i.j;t+=s;
+h+=`<div class="item"><span>${i.b}</span><span>${s}</span></div>`;
+});
+let k=bayar.value-t;
+
+h+=`
+<hr>
+<div class="item"><span>Total</span><span>${t}</span></div>
+<div class="item"><span>Bayar</span><span>${bayar.value}</span></div>
+<div class="item"><b>${k<0?"Uang Kurang":"Kembalian"}</b><b>${k}</b></div>
+`;
+
+isiStruk.innerHTML=h;
+historyData.push({time:new Date().toLocaleString(),total:t});
+localStorage.setItem("history",JSON.stringify(historyData));
+
+kasir.classList.remove("active");
+printPage.classList.add("active");
+}
+
+function openHistory(){
+let h="";
+historyData.forEach(i=>{
+h+=`<div class="item"><span>${i.time}</span><span>${i.total}</span></div>`;
+});
+listHistory.innerHTML=h||"Belum ada transaksi";
+kasir.classList.remove("active");
+history.classList.add("active");
+}
+
+function openChangePw(){
+kasir.classList.remove("active");
+changePw.classList.add("active");
+}
+
+function gantiPassword(){
+if(oldPw.value!==savedPw||newPw.value.length<4){
+pwWarn.style.display="block";return;
+}
+savedPw=newPw.value;
+localStorage.setItem("pw",savedPw);
+pwWarn.style.display="none";
+oldPw.value=newPw.value="";
+alert("Password berhasil diganti");
+backKasir();
+}
+
+function backKasir(){
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+kasir.classList.add("active");
+}
+
+function logout(){
+location.reload();
+}
+</script>
+
+</body>
+</html>

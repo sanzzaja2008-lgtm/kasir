@@ -126,10 +126,10 @@ body *{visibility:hidden}
 <script>
 let items=[];
 let historyData=JSON.parse(localStorage.getItem("history")||"[]");
-let savedPw=localStorage.getItem("pw")||"2026";
+let savedPw=localStorage.getItem("pw")||"1234";
 
 function loginUser(){
-if(user.value==="Sanzz" && pass.value===savedPw){
+if(user.value==="kasir" && pass.value===savedPw){
 login.classList.remove("active");
 kasir.classList.add("active");
 loginWarn.style.display="none";
